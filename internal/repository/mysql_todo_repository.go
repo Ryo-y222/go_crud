@@ -30,3 +30,22 @@ func (r *MySQLTodoRepository) List() ([]Todo, error) {
 	}
 	return todos, nil
 }
+
+func (r *MySQLTodoRepository) Create(title string) (Todo, error) {
+	res, err := r.db.Exec(`INSERT INTO todos (title, done) VALUES (?, false)`, title)
+	if err != nil {
+		return Todo{}, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return Todo{}, err
+	}
+
+	// 最低限：作成直後の状態を返す
+	return Todo{
+		ID:    id,
+		Title: title,
+		Done:  false,
+	}, nil
+}
