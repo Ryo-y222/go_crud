@@ -1,15 +1,10 @@
 package repository
 
-type Todo struct {
-	ID    int64  `json:"id"`
-	Title string `json:"title"`
-	Done  bool   `json:"done"`
-}
-
 type TodoRepository interface {
 	List() ([]Todo, error)
 }
 
+// 開発用（DB繋ぐまでの仮実装）
 type InMemoryTodoRepository struct{}
 
 func NewInMemoryTodoRepository() *InMemoryTodoRepository {
