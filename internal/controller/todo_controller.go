@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	"go_crud/internal/repository"
 	"go_crud/internal/service"
 )
 
@@ -19,6 +22,7 @@ func NewTodoController(svc *service.TodoService) *TodoController {
 func (ctl *TodoController) RegisterRoutes(r *gin.Engine) {
 	r.GET("/todos", ctl.list)
 	r.POST("/todos", ctl.create)
+	r.PUT("/todos/:id", ctl.updateDone)
 }
 
 func (ctl *TodoController) list(c *gin.Context) {
@@ -48,4 +52,35 @@ func (ctl *TodoController) create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, t)
+}
+
+type updateDoneRequest struct {
+	Done bool `json:"done"`
+}
+
+func (ctl *TodoController) updateDone(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	var req updateDoneRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid body"})
+		return
+	}
+
+	err = ctl.svc.UpdateTodoDone(id, req.Done)
+	if err != nil {
+		if errors.Is(err, repository.ErrTodoNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "todo not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

@@ -49,3 +49,21 @@ func (r *MySQLTodoRepository) Create(title string) (Todo, error) {
 		Done:  false,
 	}, nil
 }
+
+func (r *MySQLTodoRepository) UpdateDone(id int64, done bool) error {
+
+	res, err := r.db.Exec(`UPDATE todos SET done = ? WHERE id = ?`, done, id)
+
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
