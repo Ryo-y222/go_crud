@@ -5,3 +5,6 @@ go run .
 
 ## Health check
 curl -i http://localhost:3003/health
+
+## Todos
+curl -i http://localhost:3003/todos
