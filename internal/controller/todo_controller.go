@@ -23,6 +23,7 @@ func (ctl *TodoController) RegisterRoutes(r *gin.Engine) {
 	r.GET("/todos", ctl.list)
 	r.POST("/todos", ctl.create)
 	r.PUT("/todos/:id", ctl.updateDone)
+	r.DELETE("/todos/:id", ctl.DeleteTodo)
 }
 
 func (ctl *TodoController) list(c *gin.Context) {
@@ -83,4 +84,26 @@ func (ctl *TodoController) updateDone(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (ctl *TodoController) DeleteTodo(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	err = ctl.svc.Delete(id)
+	if err == nil {
+		c.Status(http.StatusNoContent)
+		return
+	}
+
+	if errors.Is(err, repository.ErrTodoNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "todo not found"})
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 }

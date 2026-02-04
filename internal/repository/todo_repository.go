@@ -4,6 +4,7 @@ type TodoRepository interface {
 	List() ([]Todo, error)
 	Create(title string) (Todo, error)
 	UpdateDone(id int64, done bool) error
+	Delete(id int64) error
 }
 
 // 開発用（DB繋ぐまでの仮実装）

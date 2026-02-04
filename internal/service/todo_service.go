@@ -37,3 +37,16 @@ func (s *TodoService) UpdateTodoDone(id int64, done bool) error {
 	}
 	return fmt.Errorf("update todo done: %w", err)
 }
+
+func (s *TodoService) Delete(id int64) error {
+	err := s.repo.Delete(id)
+	if err == nil {
+		return nil
+	}
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return repository.ErrTodoNotFound
+	}
+
+	return fmt.Errorf("delete todo: %w", err)
+}

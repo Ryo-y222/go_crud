@@ -67,3 +67,20 @@ func (r *MySQLTodoRepository) UpdateDone(id int64, done bool) error {
 	}
 	return nil
 }
+
+func (r *MySQLTodoRepository) Delete(id int64) error {
+	result, err := r.db.Exec(`DELETE FROM todos WHERE id=?`, id)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
